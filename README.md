@@ -41,6 +41,8 @@ How it works:
 Unit Converter Application (frontend)
 ====================================
 An easy unit calculator that converts units to your request!
+This UI can be pointed to the included backend.
+
  It Includes:
 
  *Weight
