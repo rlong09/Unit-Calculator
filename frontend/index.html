@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #8bc4f9;
+            --dark-color: #2c3e50;
+            --light-color: #f5f8fa;
+            --success-color: #2ecc71;
+            --warning-color: #e67e22;
+            --error-color: #e74c3c;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #ecf0f3;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+
+        .converter-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button:hover {
+            background-color: #3a7bc8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-display {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+        }
+
+        #resultText {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-container {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .conversion-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .conversion-side {
+            flex: 1;
+        }
+
+        .swap-btn-container {
+            margin: 0 1rem;
+        }
+
+        #swapBtn {
+            width: auto;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--dark-color);
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .conversion-container {
+                flex-direction: column;
+            }
+            
+            .conversion-side {
+                width: 100%;
+            }
+            
+            .swap-btn-container {
+                margin: 1rem 0;
+            }
+            
+            #swapBtn {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Unit Converter</h1>
+        <div class="converter-card">
+            <div class="form-group">
+                <label for="category">Measurement Category:</label>
+                <select id="category">
+                    <option value="length">Length</option>
+                    <option value="weight">Weight/Mass</option>
+                    <option value="volume">Volume</option>
+                    <option value="temperature">Temperature</option>
+                    <option value="area">Area</option>
+                </select>
+            </div>
+
+            <div class="conversion-container">
+                <div class="conversion-side">
+                    <div class="form-group">
+                        <label for="fromValue">From:</label>
+                        <input type="number" id="fromValue" placeholder="Enter value" value="1" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="fromUnit">Unit:</label>
+                        <select id="fromUnit"></select>
+                    </div>
+                </div>
+
+                <div class="swap-btn-container">
+                    <button id="swapBtn" title="Swap Units">⇄</button>
+                </div>
+
+                <div class="conversion-side">
+                    <div class="form-group">
+                        <label for="toValue">To:</label>
+                        <input type="number" id="toValue" placeholder="Result" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="toUnit">Unit:</label>
+                        <select id="toUnit"></select>
+                    </div>
+                </div>
+            </div>
+
+            <button id="convertBtn">Convert</button>
+
+            <div id="resultDisplay" class="result-display hidden">
+                <p id="resultText"></p>
+                <div class="formula-container">
+                    <p id="formula"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Long family unit conversion &copy; 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const categorySelect = document.getElementById('category');
+            const fromUnitSelect = document.getElementById('fromUnit');
+            const toUnitSelect = document.getElementById('toUnit');
+            const fromValueInput = document.getElementById('fromValue');
+            const toValueInput = document.getElementById('toValue');
+            const convertBtn = document.getElementById('convertBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const resultDisplay = document.getElementById('resultDisplay');
+            const resultText = document.getElementById('resultText');
+            const formula = document.getElementById('formula');
+
+            // API URL - update this with your actual backend URL
+            const API_URL = 'http://localhost:5000'; // Default Flask development server
+
+            // Store all units data
+            let unitsData = {};
+
+            // Load units data when page loads
+            fetchUnitsData();
+
+            // Event Listeners
+            categorySelect.addEventListener('change', updateUnitOptions);
+            convertBtn.addEventListener('click', performConversion);
+            swapBtn.addEventListener('click', swapUnits);
+            fromValueInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performConversion();
+                }
+            });
+
+            // Fetch units data from the backend
+            function fetchUnitsData() {
+                fetch(`${API_URL}/units`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        unitsData = data;
+                        updateUnitOptions();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching units data:', error);
+                        // Fallback to static data if API is not available
+                        useStaticUnitsData();
+                    });
+            }
+
+            // Fallback static units data if the backend is not available
+            function useStaticUnitsData() {
+                unitsData = {
+                    "length": [
+                        {"value": "meter", "label": "Meter (m)"},
+                        {"value": "kilometer", "label": "Kilometer (km)"},
+                        {"value": "centimeter", "label": "Centimeter (cm)"},
+                        {"value": "millimeter", "label": "Millimeter (mm)"},
+                        {"value": "mile", "label": "Mile (mi)"},
+                        {"value": "yard", "label": "Yard (yd)"},
+                        {"value": "foot", "label": "Foot (ft)"},
+                        {"value": "inch", "label": "Inch (in)"}
+                    ],
+                    "weight": [
+                        {"value": "gram", "label": "Gram (g)"},
+                        {"value": "kilogram", "label": "Kilogram (kg)"},
+                        {"value": "milligram", "label": "Milligram (mg)"},
+                        {"value": "metric_ton", "label": "Metric Ton (t)"},
+                        {"value": "pound", "label": "Pound (lb)"},
+                        {"value": "ounce", "label": "Ounce (oz)"},
+                        {"value": "stone", "label": "Stone (st)"},
+                        {"value": "us_ton", "label": "US Ton"}
+                    ],
+                    "volume": [
+                        {"value": "liter", "label": "Liter (L)"},
+                        {"value": "milliliter", "label": "Milliliter (mL)"},
+                        {"value": "cubic_meter", "label": "Cubic Meter (m³)"},
+                        {"value": "us_gallon", "label": "US Gallon (gal)"},
+                        {"value": "us_quart", "label": "US Quart (qt)"},
+                        {"value": "us_pint", "label": "US Pint (pt)"},
+                        {"value": "us_cup", "label": "US Cup"},
+                        {"value": "us_fluid_ounce", "label": "US Fluid Ounce (fl oz)"},
+                        {"value": "imperial_gallon", "label": "Imperial Gallon (gal)"}
+                    ],
+                    "temperature": [
+                        {"value": "celsius", "label": "Celsius (°C)"},
+                        {"value": "fahrenheit", "label": "Fahrenheit (°F)"},
+                        {"value": "kelvin", "label": "Kelvin (K)"}
+                    ],
+                    "area": [
+                        {"value": "square_meter", "label": "Square Meter (m²)"},
+                        {"value": "square_kilometer", "label": "Square Kilometer (km²)"},
+                        {"value": "square_centimeter", "label": "Square Centimeter (cm²)"},
+                        {"value": "hectare", "label": "Hectare (ha)"},
+                        {"value": "square_mile", "label": "Square Mile (mi²)"},
+                        {"value": "acre", "label": "Acre"},
+                        {"value": "square_yard", "label": "Square Yard (yd²)"},
+                        {"value": "square_foot", "label": "Square Foot (ft²)"},
+                        {"value": "square_inch", "label": "Square Inch (in²)"}
+                    ]
+                };
+                updateUnitOptions();
+            }
+
+            // Update unit selection options based on the selected category
+            function updateUnitOptions() {
+                const category = categorySelect.value;
+                const units = unitsData[category] || [];
+                
+                // Clear current options
+                fromUnitSelect.innerHTML = '';
+                toUnitSelect.innerHTML = '';
+                
+                // Add new options
+                units.forEach(unit => {
+                    const fromOption = document.createElement('option');
+                    fromOption.value = unit.value;
+                    fromOption.textContent = unit.label;
+                    fromUnitSelect.appendChild(fromOption);
+                    
+                    const toOption = document.createElement('option');
+                    toOption.value = unit.value;
+                    toOption.textContent = unit.label;
+                    toUnitSelect.appendChild(toOption);
+                });
+                
+                // Set default second selection to a different unit if possible
+                if (toUnitSelect.options.length > 1) {
+                    toUnitSelect.selectedIndex = 1;
+                }
+
+                // Clear previous results
+                resetResult();
+            }
+
+            // Perform the unit conversion
+            function performConversion() {
+                const category = categorySelect.value;
+                const fromUnit = fromUnitSelect.value;
+                const toUnit = toUnitSelect.value;
+                const fromValue = parseFloat(fromValueInput.value);
+                
+                // Input validation
+                if (isNaN(fromValue)) {
+                    showError('Please enter a valid number');
+                    return;
+                }
+                
+                const conversionData = {
+                    value: fromValue,
+                    from_unit: fromUnit,
+                    to_unit: toUnit,
+                    category: category
+                };
+                
+                // Call API for conversion
+                fetch(`${API_URL}/convert`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(conversionData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Error performing conversion');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResult(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError(error.message);
+                    
+                    // Fallback to static conversion if API fails
+                    if (category === 'temperature') {
+                        performStaticTemperatureConversion(fromValue, fromUnit, toUnit);
+                    } else if (category === 'length') {
+                        performStaticLengthConversion(fromValue, fromUnit, toUnit);
+                    }
+                });
+            }
+
+            // Fallback static conversion for temperature (most straightforward to implement)
+            function performStaticTemperatureConversion(value, fromUnit, toUnit) {
+                let result;
+                
+                if (fromUnit === toUnit) {
+                    result = value;
+                }
+                else if (fromUnit === 'celsius') {
+                    if (toUnit === 'fahrenheit') {
+                        result = (value * 9/5) + 32;
+                    } else if (toUnit === 'kelvin') {
+                        result = value + 273.15;
+                    }
+                }
+                else if (fromUnit === 'fahrenheit') {
+                    if (toUnit === 'celsius') {
+                        result = (value - 32) * 5/9;
+                    } else if (toUnit === 'kelvin') {
+                        result = (value - 32) * 5/9 + 273.15;
+                    }
+                }
+                else if (fromUnit === 'kelvin') {
+                    if (toUnit === 'celsius') {
+                        result = value - 273.15;
+                    } else if (toUnit === 'fahrenheit') {
+                        result = (value - 273.15) * 9/5 + 32;
+                    }
+                }
+                
+                if (result !== undefined) {
+                    const mockData = {
+                        result: result,
+                        from_value: value,
+                        from_unit: fromUnit,
+                        to_unit: toUnit,
+                        category: 'temperature'
+                    };
+                    displayResult(mockData);
+                }
+            }
+
+            // Fallback static conversion for length
+            function performStaticLengthConversion(value, fromUnit, toUnit) {
+                // Conversion factors to meters
+                const toMeters = {
+                    meter: 1,
+                    kilometer: 1000,
+                    centimeter: 0.01,
+                    millimeter: 0.001,
+                    mile: 1609.34,
+                    yard: 0.9144,
+                    foot: 0.3048,
+                    inch: 0.0254
+                };
+                
+                // Convert to meters first
+                const meters = value * toMeters[fromUnit];
+                
+                // Convert from meters to target unit
+                const result = meters / toMeters[toUnit];
+                
+                const mockData = {
+                    result: result,
+                    from_value: value,
+                    from_unit: fromUnit,
+                    to_unit: toUnit,
+                    category: 'length'
+                };
+                
+                displayResult(mockData);
+            }
+
+            // Display the conversion result
+            function displayResult(data) {
+                const result = data.result;
+                const fromValue = data.from_value;
+                const fromUnit = getLabelForUnit(data.category, data.from_unit);
+                const toUnit = getLabelForUnit(data.category, data.to_unit);
+                
+                // Update result display
+                toValueInput.value = formatNumber(result);
+                resultText.textContent = `${formatNumber(fromValue)} ${fromUnit} = ${formatNumber(result)} ${toUnit}`;
+                
+                // Show conversion formula if applicable
+                if (data.category === 'temperature') {
+                    let formulaText = '';
+                    if (data.from_unit === 'celsius' && data.to_unit === 'fahrenheit') {
+                        formulaText = `Formula: °F = (°C × 9/5) + 32`;
+                    } else if (data.from_unit === 'fahrenheit' && data.to_unit === 'celsius') {
+                        formulaText = `Formula: °C = (°F - 32) × 5/9`;
+                    } else if (data.from_unit === 'celsius' && data.to_unit === 'kelvin') {
+                        formulaText = `Formula: K = °C + 273.15`;
+                    } else if (data.from_unit === 'kelvin' && data.to_unit === 'celsius') {
+                        formulaText = `Formula: °C = K - 273.15`;
+                    } else if (data.from_unit === 'fahrenheit' && data.to_unit === 'kelvin') {
+                        formulaText = `Formula: K = (°F - 32) × 5/9 + 273.15`;
+                    } else if (data.from_unit === 'kelvin' && data.to_unit === 'fahrenheit') {
+                        formulaText = `Formula: °F = (K - 273.15) × 9/5 + 32`;
+                    }
+                    formula.textContent = formulaText;
+                } else {
+                    formula.textContent = '';
+                }
+                
+                // Show the result section
+                resultDisplay.classList.remove('hidden');
+            }
+
+            // Show error message
+            function showError(message) {
+                toValueInput.value = '';
+                resultText.textContent = `Error: ${message}`;
+                formula.textContent = '';
+                resultDisplay.classList.remove('hidden');
+            }
+
+            // Reset the result display
+            function resetResult() {
+                toValueInput.value = '';
+                resultDisplay.classList.add('hidden');
+            }
+
+            // Swap the from and to units
+            function swapUnits() {
+                const tempUnit = fromUnitSelect.value;
+                fromUnitSelect.value = toUnitSelect.value;
+                toUnitSelect.value = tempUnit;
+                
+                // If we already have a result, convert it back
+                if (toValueInput.value !== '') {
+                    const tempValue = fromValueInput.value;
+                    fromValueInput.value = toValueInput.value;
+                    performConversion();
+                }
+            }
+
+            // Get the human-readable label for a unit
+            function getLabelForUnit(category, unitValue) {
+                const units = unitsData[category] || [];
+                const unit = units.find(u => u.value === unitValue);
+                return unit ? unit.label.split(' ')[0] : unitValue;
+            }
+
+            // Format numbers to avoid excessive decimal places
+            function formatNumber(num) {
+                return parseFloat(num.toFixed(6)).toString();
+            }
+        });
+    </script>
+</body>
+</html>
