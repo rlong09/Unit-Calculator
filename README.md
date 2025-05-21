@@ -38,5 +38,19 @@ How it works:
    - Backend processes request through appropriate conversion method
    - Result is returned to frontend as JSON
 
+Unit Converter Application (frontend)
+====================================
+An easy unit calculator that converts units to your request!
+ It Includes:
+
+ *Weight
+ *Length
+ *Area
+ *Temperature
+ *Volume
+ 
+
+ 
+
 Author: Ryan Long & Thomas Long
 Date: May 12, 2025
